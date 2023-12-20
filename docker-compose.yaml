@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  prereqs:
+    build:
+      context: ./.grpc-web
+      dockerfile: ./.grpc-web/net/grpc/gateway/docker/prereqs/Dockerfile
+    image: grpcweb/prereqs
+  tonic-server:
+    build:
+      context: ./grpc-server
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+  envoy:
+    build:
+      context: ./.grpc-web
+      dockerfile: ./.grpc-web/net/grpc/gateway/docker/envoy/Dockerfile
+    image: grpcweb/envoy
+    ports:
+      - "8080:8080"
+    links:
+      - tonic-server
+  commonjs-client:
+    build:
+      context: ./.grpc-web
+      dockerfile: ./.grpc-web/net/grpc/gateway/docker/commonjs_client/Dockerfile
+    depends_on:
+      - prereqs
+    image: grpcweb/commonjs-client
+    ports:
+      - "8081:8081"
